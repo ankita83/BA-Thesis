@@ -18,7 +18,9 @@ web.config.debug = True
 
 # output 10 random sentences from the UD English treebank
 # The field "# text" contains the complete sentence
-file = open('/home/ankita/BA Thesis/UD_English-master/en-ud-dev.conllu', 'r')
+
+#change file path in case using another input file
+file = open('/en-ud-dev.conllu', 'r')
 next(file)
 sentences = []
 conllSent = defaultdict(list)

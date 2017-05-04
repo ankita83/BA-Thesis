@@ -20,7 +20,7 @@ web.config.debug = True
 # The field "# text" contains the complete sentence
 
 #change file path in case using another input file
-file = open('/en-ud-dev.conllu', 'r')
+file = open('input_files/en-ud-dev.conllu', 'r')
 next(file)
 sentences = []
 conllSent = defaultdict(list)

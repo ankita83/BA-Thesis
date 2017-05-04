@@ -1,0 +1,31 @@
+$def with (random_list)
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Webpage to select a sentence</title>
+
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    </head>
+
+    <body>
+        <!--View 10 sentences, user selects one from these sentences, whose dependency tree is to be displayed-->
+        <form action="showSentence" method="post">
+                <input type="radio" name="sentence" value="$random_list[0]" checked> $random_list[0] <br><br>
+                <input type="radio" name="sentence" value="$random_list[1]"> $random_list[1] <br><br>
+                <input type="radio" name="sentence" value="$random_list[2]"> $random_list[2] <br><br>
+                <input type="radio" name="sentence" value="$random_list[3]"> $random_list[3] <br><br>
+                <input type="radio" name="sentence" value="$random_list[4]"> $random_list[4] <br><br>
+                <input type="radio" name="sentence" value="$random_list[5]"> $random_list[5] <br><br>
+                <input type="radio" name="sentence" value="$random_list[6]"> $random_list[6] <br><br>
+                <input type="radio" name="sentence" value="$random_list[7]"> $random_list[7] <br><br>
+                <input type="radio" name="sentence" value="$random_list[8]"> $random_list[8] <br><br>
+                <input type="radio" name="sentence" value="$random_list[9]"> $random_list[9] <br><br>
+            <input type="submit" id= "the_sent" value="Submit">
+        </form>
+
+    </body>
+</html>

@@ -47,13 +47,16 @@ text { font-size: 15px; }
 
             <div id="embedding-live-example"></div>
 
-            <!--To view table of relations, whcih the user can choose from-->
+            <!--To view table of relations, which the user can choose from-->
             <div id="options">
                 <h2> Select your choices: </h2>
                 <form action="displayOptions" method="post">
-                    $def tr(values):
-                        $for v in values:
-                            <td align="left"><input type="checkbox" name="my_options" value="$v"/> $v </td>
+                    $def tr(key, deprel):
+                        $for deprel_part in ("rel", "head", "head_label", "dep", "dep_label"):
+                            <td align="left">
+                                <input type="checkbox" name="$key $deprel_part" value="$deprel[deprel_part]"/>
+                                $deprel[deprel_part]
+                            </td>
 
                     <table border="1">
                           <colgroup>
@@ -66,9 +69,9 @@ text { font-size: 15px; }
                               <th><div style="width: 100px" > Dependent </div></th>
                               <th><div style="width: 100px" > Dependent Label </div></th>
                           </tr>
-                          $for d in data[1]:
+                          $for key, val in data[1].items():
                               <tr>
-                              $:tr(d)
+                              $:tr(key, val)
                               </tr>
                     </table>
                     <br/>

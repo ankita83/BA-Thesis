@@ -48,20 +48,21 @@ def getLists(annout):
     return getOptions(rels, tags)
 
 def getOptions(rels, tags):
-    options = []
+    options = dict()
 
-    for x in rels:
-        eachRel = []
+    for idx, x in enumerate(rels):
+        deprel = {}
         for kt, vt in tags.iteritems():
             if x[1] == kt:
                 head = vt
             if x[2] == kt:
                 dependent = vt
-        eachRel.append(x[0])
-        eachRel.append(head[0])
-        eachRel.append(head[1])
-        eachRel.append(dependent[0])
-        eachRel.append(dependent[1])
-        options.append(eachRel)
+        deprel["rel"] = x[0]
+        deprel["head"] = head[0]
+        deprel["head_label"] = head[1]
+        deprel["dep"] = dependent[0]
+        deprel["dep_label"] = dependent[1]
+
+        options["rel-%d" % idx] = deprel
     #pprint(options)
     return options

@@ -9,6 +9,7 @@ import csv
 import conll_to_standoff
 import bratObject
 import generate_options
+import generate_query
 from pprint import pprint
 
 
@@ -19,8 +20,7 @@ web.config.debug = True
 # output 10 random sentences from the UD English treebank
 # The field "# text" contains the complete sentence
 
-#change file path in case using another input file
-file = open('input_files/en-ud-dev.conllu', 'r')
+file = open('/home/ankita/PycharmProjects/BAThesis/input_files/en-ud-dev.conllu', 'r')
 next(file)
 sentences = []
 conllSent = defaultdict(list)
@@ -42,10 +42,11 @@ for line in file:
 for k in conllSent.iterkeys():
     del conllSent[k][0]
 
-with open("temp.csv", 'w') as f:
-    writer = csv.writer(f)
-    for k,v in conllSent.iteritems():
-        writer.writerow([k] + v)
+# Was included to debug. No need to generate a csv
+# with open("temp.csv", 'w') as f:
+#     writer = csv.writer(f)
+#     for k,v in conllSent.iteritems():
+#         writer.writerow([k] + v)
 
 random_list = random.sample(sentences, 10)
 
@@ -84,13 +85,16 @@ class displayOptions:
         self.render = web.template.render('templates/')
 
     def POST(self):
-        data = web.input().values()
+        data = web.input()
         displayOptions.showOptions(data)
         return None
 
     @classmethod
     def showOptions(self, options):
-        pprint(options)
+        finalQuery = generate_query.getQuery(options)
+        print finalQuery
+        for k, v in options.items():
+            print k, v
 
 
 

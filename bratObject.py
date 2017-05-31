@@ -8,8 +8,8 @@ pattern1 = re.compile("^T[0-9]+$")
 pattern2 = re.compile("^R[0-9]+$")
 
 # open the .ann file created by conllXtostandoff.py
-file = open('brat_sample.txt-doc-1.ann', 'r')
-lines = file.readlines()
+#file = open('brat_sample.txt-doc-1.ann', 'r')
+#lines = file.readlines()
 
 def createBratObjects(bratformat):
     entity_objects = []

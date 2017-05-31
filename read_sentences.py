@@ -91,20 +91,15 @@ class displayOptions:
 
     @classmethod
     def showOptions(self, options):
+        #generate_query.getQuery1(options)
         finalQuery = generate_query.getQuery(options)
         print finalQuery
-        for k, v in options.items():
-            print k, v
-
+        # for k, v in options.items():
+        #     print k, v
 
 
 if __name__ ==\
         '__main__':
     app.run()
 
-
 #--------------------------------------------------------
-
-
-
-

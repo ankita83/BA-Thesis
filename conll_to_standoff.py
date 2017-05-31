@@ -1,6 +1,7 @@
 # Convert a sentence in conllU format to the standoff format required by brat nlp.
 
 import sys
+from pprint import pprint
 
 # whether to output an explicit root note
 OUTPUT_ROOT = True
@@ -33,6 +34,7 @@ def process(sentence):
     tokens, deps = [], []
 
     for l in sentence:
+        print l
         if l is not None:
             fields = l.split('\t')
         else:
@@ -90,5 +92,5 @@ def output(tokens, deps):
 
     #doctext = doctext + '\n'
     offset += 1
-
+    #pprint(annout)
     return annout

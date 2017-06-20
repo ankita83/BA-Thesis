@@ -1,5 +1,5 @@
 # Based on the sentence selected by the user, a list of options is generated
-# This list consists of [relation, head, head_label, dependent, dependent_label] for all relations in teh dependency tree.
+# This list consists of [relation, head, head_label, dependent, dependent_label] for all relations in the dependency tree.
 
 import re
 from collections import defaultdict
@@ -26,7 +26,7 @@ def getLists(annout):
     for x in RList:
         R = x.split("\t")[1]
         relation = R.split(" ")
-        if relation[0] == "root":
+        if relation[0] == "root" or relation[0] == "ROOT":
             continue;
         temp = []
         temp.append(relation[0])

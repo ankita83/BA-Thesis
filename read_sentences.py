@@ -11,6 +11,7 @@ import bratObject
 import generate_options
 import generate_query
 from pprint import pprint
+import generate_conll_format
 
 
 urls = ('/', 'index','/showSentence','showSentence','/displayOptions','displayOptions')
@@ -67,14 +68,23 @@ class showSentence:
         return self.render.showSentence(data)
 
     @classmethod
+    # def get_sent(self,sent):
+    #     bratformat = []
+    #     x = sent[0]
+    #     for k in conllSent.iterkeys():
+    #         key = k.decode('utf-8')
+    #         if x == key:
+    #             pprint(conllSent.get(key))
+    #             bratformat = conll_to_standoff.process(conllSent.get(key))
+    #             break
+
     def get_sent(self,sent):
-        bratformat = []
-        x = sent[0]
-        for k in conllSent.iterkeys():
-            key = k.decode('utf-8')
-            if x == key:
-                bratformat = conll_to_standoff.process(conllSent.get(key))
-                break
+        print sent[0]
+        print sent[1]
+        conllOutput = generate_conll_format.getConllFormat(sent)
+        del conllOutput[-1]
+        bratformat = conll_to_standoff.process(conllOutput)
+
 
         options = generate_options.getLists(bratformat)
         bratObjects = bratObject.createBratObjects(bratformat)

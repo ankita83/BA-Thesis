@@ -57,7 +57,8 @@ class index:
         self.render = web.template.render('templates/')
 
     def GET(self, name=None):
-        return self.render.index(random_list)
+        #return self.render.index(random_list)
+        return self.render.index()
 
 class showSentence:
     def __init__(self):
@@ -82,6 +83,7 @@ class showSentence:
         print sent[0]
         print sent[1]
         conllOutput = generate_conll_format.getConllFormat(sent)
+        pprint(conllOutput)
         del conllOutput[-1]
         bratformat = conll_to_standoff.process(conllOutput)
 

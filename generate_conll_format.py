@@ -4,32 +4,34 @@
 
 import subprocess
 import os
+import tempfile
 
 # main method that calls the respective methods depending on the language selected
 # in order to generate the conll format.
 def getConllFormat(sentence):
+
     if sentence[0] == "en":
-        output = enConllFormat(sentence[1])
+        inputFile = tempfile.NamedTemporaryFile(delete=False)
+        output = enConllFormat(inputFile, sentence[1])
+
     elif sentence[0] == "de":
         output = deConllFormat(sentence[1])
     elif sentence[0] == "es":
         output = esConllFormat(sentence[1])
+    elif sentence[0] == "du":
+        output = duConllFormat(sentence[1])
     else:
         print "No correct language selected"
     return output
 
 # ENGLISH
-def enConllFormat(sentence):
-    #write sentence to a file sentences_en.txt
-    inputFile = open('/home/ankita/models/syntaxnet/sentences_en.txt', 'w')
+def enConllFormat(inputFile, sentence):
     inputFile.write(sentence)
-    inputFile.close()
 
     # run bash commands from this script using subprocess
     command = '''
     MODEL_DIRECTORY="/home/ankita/models/syntaxnet/syntaxnet/models/english"
-    bazel build syntaxnet:parser_eval
-    cat sentences_en.txt | syntaxnet/models/parsey_universal/parse.sh $MODEL_DIRECTORY > output_en.conll
+    cat $filename | syntaxnet/models/parsey_universal/parse.sh $MODEL_DIRECTORY > output_en.conll
     '''
     process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, cwd='/home/ankita/models/syntaxnet/')
     process.communicate(command)
@@ -42,7 +44,7 @@ def enConllFormat(sentence):
     outputFile.close()
 
     #delete all files created in the process
-    os.remove('/home/ankita/models/syntaxnet/sentences_en.txt')
+    inputFile.close()
     os.remove('/home/ankita/models/syntaxnet/output_en.conll')
 
     #return the list containing the conll format of the user enetered sentence
@@ -108,3 +110,33 @@ def esConllFormat(sentence):
 
     #return the list containing the conll format of the user enetered sentence
     return output_es
+
+# DUTCH
+def duConllFormat(sentence):
+    #write sentence to a file sentences_en.txt
+    inputFile = open('/home/ankita/models/syntaxnet/sentences_du.txt', 'w')
+    inputFile.write(sentence)
+    inputFile.close()
+
+    # run bash commands from this script using subprocess
+    command = '''
+    MODEL_DIRECTORY="/home/ankita/models/syntaxnet/syntaxnet/models/dutch"
+
+    cat sentences_du.txt | syntaxnet/models/parsey_universal/parse.sh $MODEL_DIRECTORY > output_du.conll
+    '''
+    process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, cwd='/home/ankita/models/syntaxnet/')
+    process.communicate(command)
+
+    #read output_en.conll file and write it to a list
+    outputFile = open('/home/ankita/models/syntaxnet/output_du.conll', 'r')
+    output_du = []
+    for line in outputFile:
+        output_du.append(line)
+    outputFile.close()
+
+    #delete all files created in the process
+    os.remove('/home/ankita/models/syntaxnet/sentences_du.txt')
+    os.remove('/home/ankita/models/syntaxnet/output_du.conll')
+
+    #return the list containing the conll format of the user enetered sentence
+    return output_du

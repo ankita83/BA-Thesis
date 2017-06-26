@@ -7,7 +7,7 @@ from pprint import pprint
 OUTPUT_ROOT = True
 # the string to use to represent the root node
 ROOT_STR = 'ROOT'
-annout = []
+
 # rewrites for characters appearing in CoNLL-X types that cannot be
 # directly used in identifiers in brat-flavored standoff
 charmap = {
@@ -34,7 +34,7 @@ def process(sentence):
     tokens, deps = [], []
 
     for l in sentence:
-        print l
+        #print l
         if l is not None:
             fields = l.split('\t')
         else:
@@ -50,6 +50,7 @@ def process(sentence):
     return output(tokens,deps)
 
 def output(tokens, deps):
+    annout = []
     offset, idnum, ridnum = 0, 1, 1
     #doctext = ""
 

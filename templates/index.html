@@ -1,4 +1,4 @@
-$def with ()
+$def with (language_to_model)
 
 <!DOCTYPE html>
 
@@ -24,10 +24,10 @@ $def with ()
         <form action="showSentence" method="post" name="selectForm">
             <h2> Select the language </h2>
             <select name="language">
-                <option value="en"> english </option>
-                <option value="de"> german </option>
-                <option value="es"> spanish </option>
-                <option value="du"> dutch </option>
+                $for key in language_to_model.keys():
+                    <option value="$key"> $key </option>
+
+                    <!--<option value="English"> english </option>-->
             </select> <br><br>
             <h2> Enter a sentence/part of sentence that you wish to query. </h2>
             <input type="text" id="sentence" name="sentence" value="" placeholder="The sentence that is to be parsed." class="Large"><br><br>

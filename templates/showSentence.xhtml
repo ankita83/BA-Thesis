@@ -52,27 +52,29 @@ text { font-size: 15px; }
                 <h2> Select your choices: </h2>
                 <form action="displayOptions" method="post">
                     $def tr(key, deprel):
-                        $for deprel_part in ("rel", "head", "head_label", "dep", "dep_label"):
+                        $for deprel_part in ("head_token", "head", "head_label", "rel", "dep", "dep_label"):
                             <td align="left">
                                 <input type="checkbox" name="$key $deprel_part" value="$deprel[deprel_part]"/>
                                 $deprel[deprel_part]
                             </td>
 
                     <table border="1">
-                          <colgroup>
-                              <col span="1" style="background-color:lightblue" />
-                          </colgroup>
-                          <tr>
-                              <th><div style="width: 100px" > Relation </div></th>
-                              <th><div style="width: 100px" > Head </div></th>
-                              <th><div style="width: 100px" > Head Label </div></th>
-                              <th><div style="width: 100px" > Dependent </div></th>
-                              <th><div style="width: 100px" > Dependent Label </div></th>
-                          </tr>
-                          $for key, val in data[1].items():
-                              <tr>
-                              $:tr(key, val)
-                              </tr>
+                        <colgroup>
+                            <col span="3" style="background-color:white" />
+                            <col style="background-color:lightblue" />
+                        </colgroup>
+                        <tr>
+                            <th><div style="width: 100px" > Head Token </div></th>
+                            <th><div style="width: 100px" > Head </div></th>
+                            <th><div style="width: 100px" > Head Label </div></th>
+                            <th><div style="width: 100px" > Relation </div></th>
+                            <th><div style="width: 100px" > Dependent </div></th>
+                            <th><div style="width: 100px" > Dependent Label </div></th>
+                        </tr>
+                        $for key, val in data[1].items():
+                            <tr>
+                            $:tr(key, val)
+                            </tr>
                     </table>
                     <br/>
                     <input type="submit" id= "the_options" value="Submit"/>

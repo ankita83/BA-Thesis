@@ -1,5 +1,5 @@
 # BA-Thesis
-BA Thesis (Treebank Querying, GrETEL)
+BA Thesis (Example-based querying or Universal Dependency treebanks)
 
 run read_sentences.py: 
 This script reads the the sentence entered by the user. 

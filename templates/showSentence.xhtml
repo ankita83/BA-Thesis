@@ -51,30 +51,47 @@ text { font-size: 15px; }
             <div id="options">
                 <h2> Select your choices: </h2>
                 <form action="displayOptions" method="post">
-                    $def tr(key, deprel):
-                        $for deprel_part in ("head_token", "head", "head_label", "rel", "dep", "dep_label"):
-                            <td align="left">
-                                <input type="checkbox" name="$key $deprel_part" value="$deprel[deprel_part]"/>
+                    $def tr(token,val):
+                        $for key,deprel in val[0].iteritems():
+                            <tr>
+                            $for deprel_part in ("head", "head_label"):
+                                <td rowspan="$len(val)" align="left">
+                                <input type="checkbox" name="$token:$key $deprel_part" value="$deprel[deprel_part]"/>
                                 $deprel[deprel_part]
-                            </td>
+                                </td>
+                            $for deprel_part in ("rel", "dep", "dep_label"):
+                                <td align="left">
+                                <input type="checkbox" name="$token:$key $deprel_part" value="$deprel[deprel_part]"/>
+                                $deprel[deprel_part]
+                                </td>
+                            </tr>
+
+                        $for i in range(1, len(val)):
+                            $for key,deprel in val[i].iteritems():
+                                <tr>
+                                $for deprel_part in ("rel", "dep", "dep_label"):
+                                    <td align="left">
+                                    <input type="checkbox" name="$token:$key $deprel_part" value="$deprel[deprel_part]"/>
+                                    $deprel[deprel_part]
+                                    </td>
+                                </tr>
+
 
                     <table border="1">
                         <colgroup>
-                            <col span="3" style="background-color:white" />
+                            <col span="2" style="background-color:white" />
                             <col style="background-color:lightblue" />
                         </colgroup>
                         <tr>
-                            <th><div style="width: 100px" > Head Token </div></th>
                             <th><div style="width: 100px" > Head </div></th>
                             <th><div style="width: 100px" > Head Label </div></th>
                             <th><div style="width: 100px" > Relation </div></th>
                             <th><div style="width: 100px" > Dependent </div></th>
                             <th><div style="width: 100px" > Dependent Label </div></th>
                         </tr>
-                        $for key, val in data[1].items():
-                            <tr>
-                            $:tr(key, val)
-                            </tr>
+                        $for token,val in data[1].iteritems():
+                            $:tr(token,val)
+
                     </table>
                     <br/>
                     <input type="submit" id= "the_options" value="Submit"/>

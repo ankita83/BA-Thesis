@@ -52,12 +52,14 @@ def getOptions(rels, tags):
     # pprint(rels)
 
     options = dict()
+    finaldict = defaultdict(list)
 
     for idx, x in enumerate(rels):
         deprel = {}
         for kt, vt in tags.iteritems():
             if x[1] == kt:
                 head = vt
+                finaldict[kt] = []
                 deprel["head_token"] = kt
             if x[2] == kt:
                 dependent = vt
@@ -68,31 +70,12 @@ def getOptions(rels, tags):
         deprel["dep_label"] = dependent[1]
 
         options["rel-%d" % idx] = deprel
-    pprint(options)
-    trial(options)
-    return options
 
-def trial(options):
-    tokendict = defaultdict(tuple)
-    depdict = defaultdict(list)
-    finaldict = defaultdict(list)
-
-    for value in options.values():
-        k = value["head_token"]
-        vtoken = (k, value["head"], value["head_label"])
-        tokendict[k] = vtoken
-
-        vdep = [value["rel"], value["dep"], value["dep_label"]]
-        depdict[k].append(vdep)
-
-    pprint(tokendict)
-    pprint(depdict)
-
-    for ktoken, vtoken in tokendict.iteritems():
-        for kdep, vdep in depdict.iteritems():
-            if ktoken == kdep :
-                finaldict[vtoken] = (vdep)
+    for key in finaldict.keys():
+        for k, v in options.iteritems():
+            if v["head_token"] == key:
+                finaldict[key].append({k:v})
 
     pprint(finaldict)
-
-
+    pprint(options)
+    return finaldict

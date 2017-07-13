@@ -10,16 +10,19 @@ import csv
 import conll_to_standoff
 import bratObject
 import generate_options
-import generate_query
 from pprint import pprint
 import generate_conll_format
 import config
 import string
-
+import generate_query
+import webbrowser as wb
+import urllib as ul
 
 urls = ('/', 'index','/showSentence','showSentence','/displayOptions','displayOptions')
 app = web.application(urls, globals())
 web.config.debug = True
+treebank = ""
+
 
 #----------------------- OLD CODE CAN BE DELETED ------------------------------
 # output 10 random sentences from the UD English treebank
@@ -87,6 +90,8 @@ class showSentence:
 
     @classmethod
     def get_sent(self,sent):
+        global treebank
+        treebank = config.language_to_model[sent[0]]
 
         # check if there is a space before last punctuation character, if not insert one
         x = sent[1]
@@ -110,15 +115,17 @@ class displayOptions:
 
     def POST(self):
         data = web.input()
+        #pprint(data)
+        #trial_query.getQuery(data)
         displayOptions.showOptions(data)
         return None
 
     @classmethod
     def showOptions(self, options):
         finalQuery = generate_query.getQuery(options)
-        print finalQuery
-        # for k, v in options.items():
-        #     print k, v
+        print treebank
+        q = ul.quote(finalQuery.encode('utf-8'))
+        wb.open_new_tab("https://weblicht.sfs.uni-tuebingen.de/tundra-beta/public/treebank.html?bank=%s&q=%s" %(treebank,q))
 
 
 if __name__ ==\

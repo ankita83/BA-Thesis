@@ -1,5 +1,5 @@
 # BA-Thesis
-BA Thesis (Example-based querying or Universal Dependency treebanks)
+BA Thesis (Example-based querying for Universal Dependency treebanks)
 
 run read_sentences.py: 
 This script reads the the sentence entered by the user. 

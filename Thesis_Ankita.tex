@@ -1,0 +1,262 @@
+\documentclass[]{scrartcl}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{amsthm}
+\usepackage[T1]{fontenc} 
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{gb4e}
+\noautomath
+
+%opening
+
+%to display German examples and their English translation
+\newtheoremstyle{exmp}{0.2cm}{0pt}{}{1cm}{\itshape}{.}{.5em}{}
+\theoremstyle{exmp}
+\newtheorem{exmp}{}
+
+\begin{document}
+\setlength{\parindent}{0pt} %do NOT indent new paragraphs
+\pagenumbering{gobble} % do not display/count pages from here
+\clearpage
+
+\begin{titlepage}
+	\author{Ankita Kirtikumar Oswal\\Student no. 3976199}
+	\title{Example-based querying for Universal Dependency treebanks}
+	\date{04 September, 2017}
+	\maketitle
+	\vspace{3cm}
+	\centering \includegraphics{./uni_emblem.png}\\
+	\vspace{3cm}
+	\large{
+		Department of General Linguistics\\
+		\vspace{0.5cm}
+		International Studies in Computational Linguistics\\
+		\vspace{0.5cm}
+		Supervision by Dr. phil. Dani\"el de Kok\\
+	}
+\end{titlepage}
+
+\newpage
+\onehalfspacing
+\tableofcontents
+\singlespacing
+\newpage
+\pagenumbering{arabic} %start page numbering here
+
+% ---------------------------------------------
+\section{Introduction}
+A treebank can be defined as a linguistically parsed text corpus that annotates syntactic or semantic sentence structure. Treebanks have been around in some shape or form since the 1970s. One of the earliest efforts to produce a syntactically annotated corpus was performed by Ulf Teleman and colleagues at Lund University \cite{Teleman}, resulting in close to 300,000 words of both written and spoken Swedish, manually annotated with both phrase structure and grammatical functions, an impressive achievement at the time but unfortunately documented only in Swedish, as shown by Nivre, J. \cite{Nivre}. \\
+The methods for treebank development have evolved considerably from the very first treebank projects, where all annotation was done manually, to the present-day situation, which is characterized by a more or less elaborate combination of manual work and automatic processing. This methodology, for example, was used in building a large annotated corpus of English, the Penn Treebank \cite{Taylor}. \\
+Although automatic annotation has the advantages of being inexpensive and consistent in order to build large treebanks, reading these treebanks involves the use of complex search and visualization tools. This further demands the knowledge of specific data structures and query languages, for example the TIGERSearch query language \cite{TIGERSearch}, which may deter linguists from using treebanks. \\
+One possible solution to this problem is example-based querying which enables linguists to query large treebanks using what linguists are most familiar with, namely natural language. This approach has been implemented in GrETEL(Greedy Extraction of Trees for Empirical Linguistics) \cite{GrETEL}, an online search engine for querying syntactic constructions in treebanks for written and spoken Dutch. But GrETEL is specifically designed for a single parser, the Alpino parser \cite{Alpino}, and for a single language, Dutch. \\
+Given the growing number of treebanks for natural languages, a common search engine that allows to query treebanks for any language would be required. The system presented in this paper aims at implementing such a search engine by making use of Universal Dependencies \cite{UDpaper}, \cite{UDwebsite}, a project that is developing cross-linguistically consistent treebank annotation for many languages. The SyntaxNet parser \cite{Syntaxnet}, an open source framework implemented in tensorflow developed at Google, trained for 40 languages so far is used to parse the example sentence entered by the user. \\
+The remainder of this paper is structured as follows. Section \ref{QuerySearchLanguages} discusses query search languages. After outlining query issues faced by linguists using example sentence structures from the TIGERSearch query language, we describe example-based querying as a possible solution in section \ref{ExampleBasedQuerying}. In this section we also briefly present the architecture of GrETEL as a motivation for our work. We then move on to explain Universal Dependencies and the SyntaxNet parser in sections \ref{UD} and \ref{Syntaxnet} respectively. Section \ref{Architecture} describes the architecture of our system and T\"uNDRA, a web application for searching treebanks and viewing the results, thereafter which, sections \ref{Evaluation} and \ref{Result} describe the evaluation setup and the results of the evaluation respectively. We conclude, in section \ref{FutureWork}, with a brief outlook on the future.
+
+% ----------------------------------------------------------
+
+\section{Query search languages}\label{QuerySearchLanguages}
+Treebanks are a useful resource for different kinds of linguistic based research that is related to syntax. This includes not only syntactic research in a narrow sense but research on any linguistic phenomenon that is dependent on syntactic properties. However, an efficient use of treebanks in corpus-based research requires adequate tools for searching and browsing treebanks. One of the main ways to extract evidence from a treebank is through efficient search tools. \\
+Nowadays there are many natural language treebanks and almost as many formal languages to query those treebanks. For example, the Penn Treebank can be queried with Tgrep2 \cite{Tgrep2}, the TIGER treebank \cite{TIGERtreebank} and CGN treebank for spoken Dutch \cite{CGN} require the TIGERSearch query language, and the W3C standards XPath and XQuery can be used to search and extract information from the LASSY treebank \cite{LASSY}. A major challenge here is the significantly limited user-friendliness of these query languages and search tools. \\
+The TIGERSearch query language and some of its features is briefly explained in the following section. 
+
+\subsection{The TIGERSearch query language}\label{TIGER}
+The TIGER language is a query language originally developed for the TIGERSearch query engine  by the Institue for Natural Language Processing at the University of Stuttgart \cite{IMS}. The TIGER language is not only a query language, but a general description language for syntax graphs i.e.restricted directed acyclic graphs. Syntax graphs are close relatives to (syntax) trees, feature descriptions and dependency graphs. \\
+In this section we briefly describe some features of the TIGERSearch query language. A complete detailed description of the language is available in the TIGERSearch manual \cite{TIGERmanual}. \\
+\subsubsection{Node descriptions}
+In the TIGERSearch language, graph descriptions are made from (restricted) Boolean expressions over node relations. A node, or a node description, is described as a pair of a node identifier and a feature value constraint, i.e. boolean expressions over feature-value pairs, as seen in example (\ref{node1}). Nodes can be referred to by logical variables (eg.\#n) which are bound existentially at the outermost formula level. In example (\ref{node2}) the node variable refers to a complex feature constraint consisting of multiple feature-value pairs. The node variable can be completely omitted from a node description unless it is needed for co-reference with some other node description, as can be seen in example (\ref{node3}). The node variable \#n refers to a feature-value constraint (pos=``VERB''). This feature-value constraint is referred to again using the node variable as head of the constraint (pos=``NOUN''), indicating a head-dependent relation between a verb and a noun. 
+
+\begin{exe}
+	\ex \label{node1}
+	\#n:[pos = ``VERB''] 
+\end{exe}
+\begin{exe}
+	\ex \label{node2}
+	\#n:([word = ``saw''] > [pos = ``NOUN''])
+\end{exe}
+\begin{exe}
+	\ex \label{node3}
+	\#n:[pos = ``VERB''] \& (\#n > [pos = ``NOUN''])
+\end{exe}
+\vspace{0.2cm}
+
+\subsubsection{Boolean expressions}
+Descriptions of feature values may be combined as Boolean expressions. Various Boolean operators that can be used are ! (negation) \& (conjunction), and | (disjunction). Example (\ref{bool1}) shows a feature value pair combined by disjunction. The pos feature can take the value ``VERB'' or the value ``NOUN''. Example (\ref{bool2}) is a complex feature constraint consisting of a Boolean expressions over two feature-value pairs. 
+\begin{exe}
+	\ex \label{bool1}
+	pos = (``VERB'' | ``NOUN'') 
+\end{exe}
+\begin{exe}
+	\ex \label{bool2}
+	(word = ``saw'' \& pos = ``VERB'')
+\end{exe}
+\vspace{0.2cm}
+
+\subsubsection{Node relations}
+Since syntax graphs are two-dimensional objects, two operators are used to express spatial relations. The vertical dimension is represented by the dominance relation (>) and the horizontal dimension is represented by the precedence relation (.). \\
+
+\textbf{Dominance relation}\\
+Dominance in general means there is a path from one node to another node. The symbol > means direct unlabeled dominance. It can be further specified by an edge label, for example HD. This means that labeled direct dominance is expressed by >HD. The constraint that an edge which is labeled HD leads from node \#n1 to node \#n3 (or that \#n3 is a direct HD-successor of \#n1) is written as in example (\ref{rel1}). 
+\begin{exe}
+	\ex \label{rel1}
+	\#n1 >HD \#n3
+\end{exe}
+\vspace{0.2cm}
+Labeled direct dominance encodes the vertical dimension of the syntax tree as shown in the graph in figure \ref{graph1}. 
+
+\begin{figure}[h]
+\includegraphics[scale=0.7]{dominanceTree}
+\centering
+\caption{A simple syntax graph}
+\label{graph1}
+\end{figure}
+
+Labeled dominance is a relation among nodes, not a function like it is the case for feature structures. This means that there may be more than one edge with the same label leading out of one mother node, for example, the NK-edges in figure \ref{graph1}.
+There may exist a path from one node to another node via a connected series of direct dominance relations, showing indirect dominance relation. This can be represented in TIGERSearch language as >* or >n, where * means a minimum distance of 1 as a node cannot dominate itself, and n is a dominance with distance n.\\
+
+\vspace{0.2cm}
+\textbf{Precedence relation} \\
+A syntax graph is not only defined by constraining the vertical arrangement of its nodes, but also by the horizontal order of its nodes, i.e. by the precedence relation among the nodes. The . symbol to represent direct precedence in the TIGERSearch query language. The horizontal dimension of the tree in the presented figure \ref{graph1} is determined by the two precedence constraints in example (\ref{prec1}) and example (\ref{prec2}). 
+\begin{exe}
+	\ex \label{prec1}
+\#n4 . \#n5 
+\end{exe}
+\begin{exe}
+	\ex \label{prec2}
+\#n5 . \#n3
+\end{exe}
+\vspace{0.2cm}
+Our system currently only generates a search query with labeled and unlabeled direct dominance. Integrating other features of the TIGERSearch query language, such as the precedence relation and indirect dominance relation is one of the goals of future work.
+
+\subsection{Querying issues}
+As one can see from the examples in section \ref{TIGER}, query languages require knowledge of specific data formats. Queries can get long and complex relatively quickly. Due of the overload of query languages, annotation formats and data structures, many linguists do not easily find what they are looking for which discourages them from doing treebank mining. It requires time and effort to learn a formal language. Linguists who are unfamiliar with formal languages are often reluctant towards learning such a language. What linguists would require is a querying tool that does not ask for any formal input query. As input, the tool takes something linguists are most familiar with: natural language. A possible solution to these querying issues is example-based querying which is explained in the following section. 
+ 
+\section{Example-based querying}\label{ExampleBasedQuerying}
+Linguists tends to start their research with example sentences. Example-based querying enables the usage of these example sentences as a starting point for treebank searching, thus aiding linguists to solve the above mentioned querying issues. The procedure consists of a number of steps which defines how similar the search results and the input sentence should be. This approach enables a linguist to query a treebank without knowledge of any formal query language, the tree representation, nor the precise grammar implementation used for the annotation of the trees.\\
+Some works related to this approach are the Linguist\textquotesingle s Search Engine \cite{Resnik}, a tool that makes use of example-based querying, the TIGER Corpus Navigator \cite{Hellman}, which is a Semantic Web system used to classify and retrieve sentences from the TIGER corpus on the basis of abstract linguistic concepts, GrETEL (Greedy Extraction of Trees for Empirical Linguistics)\cite{GrETEL}, a query engine that allows linguists to search the LASSY treebank\cite{LASSY} using example-based querying.\\
+Our work of example-based querying is motivated from the GrETEL query engine, which is explained briefly in section \ref{Gretel}.
+
+\subsection{GrETEL (Greedy Extraction of Trees for Empirical Linguistics)}\label{Gretel}
+GrETEL (Greedy Extraction of Trees for Empirical Linguistics) is an online query engine, in which linguists can use natural language examples as a starting point for searching a treebank without knowledge about tree representations nor formal query languages \cite{GrETEL}. \\
+GrETEL has been optimised for querying LASSY Small, the manually annotated part of the LASSY treebank \cite{LASSY} of written and spoken Dutch. The LASSY treebank consists of unordered dependency trees in XML format, and therefore can be queried with XPath and XQuery.\\
+Figure \ref{GArch} presents the architecture of GrETEL \cite{GrETEL}. The system takes as input an example of the syntactic construction the user is looking for. Example (\ref{egGretel}) shows an input sentence, which need not necessarily be a complete sentence, but may simply be a syntactic construction. The construction is then parsed with the Alpino parser \cite{Alpino}, which is the same parser that is used for the creation of the treebank. The user can indicate which parts of the input construction are relevant by marking the same, as shown in figure \ref{Matrix}. The Subtree Finder then looks up annotations in the parse tree and `cuts out' the subtree in figure \ref{subtree}. The XPath Generator takes as input this subtree and generates the XPath query in (\ref{query}). Finally the query is matched against the LASSY small treebank and any matching constructions found are displayed to the user.\\
+
+\begin{exe}
+	\ex \label{egGretel}
+	\gll Het doden van olifanten is verboden. \\
+	The kill of elephants is forbidden. \\
+	\trans `Killing elephants is prohibited.'
+\end{exe}
+
+\begin{exe}
+	\ex \label{query}
+	//node[@cat="np" and node[@rel="det" and @root="het" and @pos="det"] \\
+	and node[@rel="hd" and @pos="verb"] and node[@rel="mod" and @cat="pp" \\
+	and node[@rel="hd" and @root="van" and @pos="prep"] and node[@rel="obj1" \\
+	and @cat="np" and node[@rel="hd" and @pos="noun"]]]]
+\end{exe}
+
+\begin{figure}[h]
+	\includegraphics[scale=0.5]{GrETELArchitecture}
+	\centering
+	\caption{Architecture of GrETEL}
+	\label{GArch}
+\end{figure}
+
+\begin{figure}[h]
+	\includegraphics[scale=0.7]{inputmatrix}
+	\centering
+	\caption{Input Matrix for example (\ref{egGretel})}
+	\label{Matrix}
+\end{figure}
+
+\begin{figure}[h]
+	\includegraphics[scale=0.7]{alpinoParse}
+	\centering
+	\caption{Alpino parse of example (\ref{egGretel}) with selected subtree}
+	\label{subtree}	
+\end{figure}
+
+\section{Architecture of the system}\label{Architecture}
+
+\subsection{Universal Dependencies}\label{UD}
+
+\subsection{SyntaxNet Parser}\label{Syntaxnet}
+
+\subsection{Working of the system}
+
+\section{Evaluation setup}\label{Evaluation}
+
+\section{Results and conclusion}\label{Result}
+
+\section{Future work}\label{FutureWork}
+
+% --------------- Reference Section ------------------------
+\newpage
+\addcontentsline{toc}{section}{References}
+\begin{thebibliography}{20}
+
+\bibitem{GrETEL}
+Augustinus, L., Vandeghinste, V., \& Van Eynde, F. (2012, May). ``Example-based treebank querying'', in \textit{Proceedings of the 8th International Conference on Language Resources and Evaluation (LREC 2012)} pp. 3161-3167. ELRA.
+
+\bibitem{TIGERtreebank}
+Brants, S., Dipper, S., Hansen, S., Lezius, W., \& Smith, G. (2002, September). ``The TIGER treebank'', in \textit{Proceedings of the workshop on treebanks and linguistic theories} (Vol. 168).
+
+\bibitem{Hellman}
+Hellmann, S., Unbehauen, J., Chiarcos, C., \& Ngonga Ngomo, A. C. (2010). ``The tiger corpus navigator''.
+
+\bibitem{IMS}
+Institut f\"ur Maschinelle Sprachverarbeitung.\\
+\texttt{http://www.ims.uni-stuttgart.de/forschung/ressourcen/werkzeuge/tiger\allowbreak search.html} 
+
+\bibitem{TIGERSearch}
+K\"onig, E., \& Lezius, W. (2003). 
+``The TIGER language.-A Description Language for Syntax Graphs.-Formal Definition''.
+
+\bibitem{TIGERmanual}
+König, E., Lezius, W., \& Voormann, H. (2003). ``TIGERSearch User’s Manual''. Institut f\"ur Maschinelle Sprachverarbeitung, University of Stuttgart.
+
+\bibitem{Alpino}
+Malouf, R., \& Van Noord, G. (2004). ``Stochastic attribute value grammars'', in \textit{IJCNLP-04 Workshop Beyond Shallow Analyses-Formalisms and statistical modeling for deep analyses}.
+
+\bibitem{Nivre}
+Nivre, J. (2002). 
+``What kinds of trees grow in Swedish soil?{''}, in \textit{First Workshop on treebanks and linguistic theories}, pp 123-138
+
+\bibitem{UDpaper}
+Nivre, J., de Marneffe, M. C., Ginter, F., Goldberg, Y., Hajic, J., Manning, C. D., ... \& Tsarfaty, R. (2016, May). ``Universal Dependencies v1: A Multilingual Treebank Collection'', in \textit{LREC}.
+
+\bibitem{Syntaxnet}
+Petrov, S. (2016). ``Announcing syntaxnet: The world’s most accurate parser goes open source''. Google Research Blog.
+
+\bibitem{Resnik}
+Resnik, P., \& Elkiss, A. (2005, June). ``The linguist's search engine: an overview'', in \textit{Proceedings of the ACL 2005 on Interactive poster and demonstration sessions} pp. 33-36. Association for Computational Linguistics.
+
+\bibitem{Tgrep2}
+Rohde, D. L. (2005). ``Tgrep2 user manual version 1.15''. Massachusetts Institute of Technology.
+
+\bibitem{Taylor}
+Taylor, A., Marcus, M., \& Santorini, B. (2003). 
+``The Penn treebank: an overview'', in \textit{Treebanks}, pp. 5-22. Springer Netherlands.
+
+\bibitem{Teleman}
+Teleman, U. (1974). 
+``Manual för grammatisk beskrivning av talad och skriven svenska''.
+Studentlitteratur.
+
+\bibitem{UDwebsite}
+``Universal Dependencies'' \\
+\texttt{http://universaldependencies.org/}
+
+\bibitem{CGN}
+Van Eerten, L. (2007). ``Over het corpus gesproken nederlands''. Nederlandse Taalkunde, 12(3), pp. 194-215.
+
+\bibitem{LASSY}
+Van Noord, G., Bouma, G., Van Eynde, F., De Kok, D., Van der Linde, J., Schuurman, I., ... \& Vandeghinste, V. (2013). ``Large scale syntactic annotation of written Dutch: Lassy'', in \textit{Essential Speech and Language Technology for Dutch} pp. 147-164. Springer Berlin Heidelberg.
+
+
+
+\end{thebibliography}
+% ----------------------------------------------------------
+
+\end{document}

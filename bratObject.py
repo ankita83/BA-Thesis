@@ -3,6 +3,7 @@
 # using the brat nlp.
 
 import re
+from pprint import pprint
 
 pattern1 = re.compile("^T[0-9]+$")
 pattern2 = re.compile("^R[0-9]+$")
@@ -11,7 +12,7 @@ pattern2 = re.compile("^R[0-9]+$")
 #file = open('brat_sample.txt-doc-1.ann', 'r')
 #lines = file.readlines()
 
-def createBratObjects(bratformat):
+def createBratObjects(bratformat, selectedWord, selectedRel):
     entity_objects = []
     relation_objects = []
     for l in bratformat:
@@ -22,18 +23,28 @@ def createBratObjects(bratformat):
             entity_objects.append(fields)
         elif pattern2.match(fields[0]):
             relation_objects.append(fields)
-    collData = createCollData(entity_objects, relation_objects)
+
+    pprint(entity_objects)
+    pprint(relation_objects)
+
+    collData = createCollData(entity_objects, relation_objects, selectedWord, selectedRel)
     docData = createDocData(entity_objects, relation_objects)
 
     return [collData, docData]
 
-def createCollData(entity_objects, relation_objects):
+def createCollData(entity_objects, relation_objects, selectedWord, selectedRel):
     e_type_objects = []
+    pprint(selectedWord)
+# e[1] is the label (eg: NOUN), e[4] is the word (eg: cat)
     for e in entity_objects:
+        if e[4] in selectedWord:
+            color = "#f9075c"
+        else:
+            color = "#7fa2ff"
         entry = {
             'type': e[1],
             'labels': [e[1]],
-            'bgColor': '#7fa2ff',
+            'bgColor': '%s' %color,
             'borderColor': 'darken'
         }
         e_type_objects.append(entry)
@@ -41,6 +52,10 @@ def createCollData(entity_objects, relation_objects):
 
     r_type_objects = []
     for r in relation_objects:
+        if r[1] in selectedRel:
+            color = "red"
+        else:
+            color = "purple"
         target1 = ""
         target2 = ""
         x = str(r[2].split(':')[1])
@@ -62,7 +77,7 @@ def createCollData(entity_objects, relation_objects):
             'type': r[1],
             'labels': [r[1]],
             'dashArray': '3,3',
-            'color': 'purple',
+            'color': '%s' %color,
             'args': [arg1, arg2]
         }
         r_type_objects.append(entry)
@@ -71,6 +86,7 @@ def createCollData(entity_objects, relation_objects):
        'entity_types': e_type_objects,
        'relation_types': r_type_objects
     }
+    pprint(collData)
     return collData
 
 def createDocData(entity_objects, relation_objects):
@@ -92,6 +108,7 @@ def createDocData(entity_objects, relation_objects):
        'entities': entities,
        'relations': relations
     }
+    print docData
     return docData
 
 

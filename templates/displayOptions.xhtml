@@ -1,0 +1,121 @@
+$def with (bratObject, query)
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Embedded Visualisations - brat rapid annotation tool</title>
+
+    <link rel="stylesheet" type="text/css" href="/static/style.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/jquery-ui-redmond.css"/>
+
+        <link rel="stylesheet" type="text/css" href="http://weaver.nlplab.org/~brat/demo/v1.3/style-vis.css"/>
+
+    <link rel="shortcut icon" href="favicon.ico"/>
+    <!-- Google Analytics
+    <script type="text/javascript" src="js/google_analytics.js"></script>
+    -->
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/json2/20160511/json2.js"></script>
+
+        <script type="text/javascript" src="http://weaver.nlplab.org/~brat/demo/v1.3/client/lib/head.load.min.js"></script>
+
+    <!-- Google Webmaster Tools -->
+    <meta name="google-site-verification" content="YJkZhvWcgZNvVX2HY3TXG1OcEWJHMy7Bi_ossuqKvRE"/>
+
+    <style type="text/css">
+    text { font-size: 15px; }
+    .span text { font-size: 10px; }
+    .arcs text { font-size: 9px; }
+
+    .Large
+    {
+    font-size: 14pt;
+    height: 50px;
+    width: 100%;
+    }
+</style>
+
+</head>
+<body>
+    <div id="main" class="center">
+        <div id="content">
+
+            <noscript>
+                <div id="noscript">
+                    It appears that you have Javascript disabled, while this is a sane
+                    default it makes an our demo slightly difficult (if not impossible).
+                    Please consider enabling Javascript for this page to try out the demo.
+                </div>
+            </noscript>
+
+            <h2 id="live">live embedding</h2>
+
+            <div id="embedding-live-example"></div>
+
+            <!--trial for displaying query -->
+            <br />
+            <h2 id="query">Search Query</h2>
+
+            <div>
+                <form action="displaySearch" method="post">
+                    <input type="text" name="query" value="$query" readonly="readonly" class="Large"/>
+                    <br /> <br />
+                    <input type="button" value="Change selections" onclick="javascript:history.back()"/>
+                    <br /> <br />
+                    <input type="submit" name="tundra" value="View search results"/>
+                </form>
+            </div>
+            <!-- trial end -->
+
+            <script type="text/javascript">
+
+                var bratLocation = 'http://weaver.nlplab.org/~brat/demo/v1.3';
+                head.js(
+                    // External libraries
+                    bratLocation + '/client/lib/jquery.min.js',
+                    bratLocation + '/client/lib/jquery.svg.min.js',
+                    bratLocation + '/client/lib/jquery.svgdom.min.js',
+
+
+                    // brat helper modules
+                    bratLocation + '/client/src/configuration.js',
+                    bratLocation + '/client/src/util.js',
+                    bratLocation + '/client/src/annotation_log.js',
+                    bratLocation + '/client/lib/webfont.js',
+                    // brat modules
+                    bratLocation + '/client/src/dispatcher.js',
+                    bratLocation + '/client/src/url_monitor.js',
+                    bratLocation + '/client/src/visualizer.js'
+                );
+
+                var webFontURLs = [
+                    bratLocation + '/static/fonts/Astloch-Bold.ttf',
+                    bratLocation + '/static/fonts/PT_Sans-Caption-Web-Regular.ttf',
+                    bratLocation + '/static/fonts/Liberation_Sans-Regular.ttf'
+                ];
+
+                head.ready(function() {
+
+                    var collData = $bratObject[0]
+
+                    var docData = $bratObject[1]
+
+                    // We'll do it live!
+                    var liveDiv = $$('#embedding-live-example');
+
+                    // Time for some "real" brat coding, let's hook into the dispatcher
+                    var liveDispatcher = Util.embed('embedding-live-example',
+                            $$.extend({'collection': null}, collData),
+                            $$.extend({}, docData), webFontURLs);
+
+                });
+
+            </script>
+        </div>
+
+    </div>
+
+</body>
+</html>

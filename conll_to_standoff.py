@@ -93,5 +93,5 @@ def output(tokens, deps):
 
     #doctext = doctext + '\n'
     offset += 1
-    #pprint(annout)
+    # pprint(annout)
     return annout

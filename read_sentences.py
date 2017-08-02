@@ -3,10 +3,8 @@
 # selected sentence is then passed to the necessary scripts in order to finally view the dependency tree.
 # and the tokens that the user can select in order to create a search query (in TIGERSearch format)
 
-import random
 import web
 from collections import defaultdict
-import csv
 import conll_to_standoff
 import bratObject
 import generate_options
@@ -17,13 +15,18 @@ import string
 import generate_query
 import webbrowser as wb
 import urllib as ul
+import os
+import sys
 
-urls = ('/', 'index','/showSentence','showSentence','/displayOptions','displayOptions')
+urls = ('/', 'index','/showSentence','showSentence','/displayOptions','displayOptions', '/displaySearch', 'displaySearch')
 app = web.application(urls, globals())
 web.config.debug = True
 treebank = ""
-
-
+bratObjects = []
+# tempList = []
+bratformat = []
+finalQuery = ""
+outputFile = ""
 #----------------------- OLD CODE CAN BE DELETED ------------------------------
 # output 10 random sentences from the UD English treebank
 # The field "# text" contains the complete sentence
@@ -65,7 +68,6 @@ class index:
         self.render = web.template.render('templates/')
 
     def GET(self, name=None):
-        #return self.render.index(random_list)
         return self.render.index(config.language_to_model)
 
 class showSentence:
@@ -77,17 +79,9 @@ class showSentence:
         #pprint(data)
         return self.render.showSentence(data)
 
-    #@classmethod
-    # def get_sent(self,sent):
-    #     bratformat = []
-    #     x = sent[0]
-    #     for k in conllSent.iterkeys():
-    #         key = k.decode('utf-8')
-    #         if x == key:
-    #             pprint(conllSent.get(key))
-    #             bratformat = conll_to_standoff.process(conllSent.get(key))
-    #             break
-
+# process the sentence entered by the user: check punctuation errors, convert to conll format.
+# Convert conll to standoff format for bratnlp.
+# generate the necessary objects to view the dependency tree and the options that the user can select
     @classmethod
     def get_sent(self,sent):
         global treebank
@@ -101,32 +95,54 @@ class showSentence:
                 sent[1] = temp
 
         conllOutput = generate_conll_format.getConllFormat(sent)
+        # pprint(conllOutput)
         del conllOutput[-1]
+
+        global bratformat
         bratformat = conll_to_standoff.process(conllOutput)
-
-
         options = generate_options.getLists(bratformat)
-        bratObjects = bratObject.createBratObjects(bratformat)
+
+        # global tempList
+        # del tempList[:]
+        global bratObjects
+        bratObjects = bratObject.createBratObjects(bratformat, [], [])
         return [bratObjects,options]
 
+# Processes the options selected by the user to generate the search query
+# and then view the search results
 class displayOptions:
     def __init__(self):
         self.render = web.template.render('templates/')
 
     def POST(self):
         data = web.input()
-        #pprint(data)
-        #trial_query.getQuery(data)
-        displayOptions.showOptions(data)
-        return None
+        global finalQuery
+        finalQuery = displayOptions.showOptions(data)
+
+        tempList = generate_conll_format.getSelectedList(finalQuery)
+        selectedWord = tempList[0]
+        selectedRel = tempList[1]
+        global outputFile
+        outputFile = tempList[2]
+        global bratObjects
+        bratObjects = bratObject.createBratObjects(bratformat, selectedWord, selectedRel)
+
+        return self.render.displayOptions(bratObjects,finalQuery)
 
     @classmethod
     def showOptions(self, options):
         finalQuery = generate_query.getQuery(options)
-        print treebank
-        q = ul.quote(finalQuery.encode('utf-8'))
-        wb.open_new_tab("https://weblicht.sfs.uni-tuebingen.de/tundra-beta/public/treebank.html?bank=%s&q=%s" %(treebank,q))
+        return finalQuery
 
+class displaySearch:
+    def __init__(self):
+        self.render = web.template.render('templates/')
+
+    def POST(self):
+        os.remove(outputFile)
+        q = ul.quote(finalQuery.encode('utf-8'))
+        wb.open("https://weblicht.sfs.uni-tuebingen.de/tundra-beta/public/treebank.html?bank=%s&q=%s" % (treebank, q))
+        return None
 
 if __name__ ==\
         '__main__':

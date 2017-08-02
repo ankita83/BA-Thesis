@@ -76,6 +76,6 @@ def getOptions(rels, tags):
             if v["head_token"] == key:
                 finaldict[key].append({k:v})
 
-    pprint(finaldict)
-    pprint(options)
+    # pprint(finaldict)
+    # pprint(options)
     return finaldict

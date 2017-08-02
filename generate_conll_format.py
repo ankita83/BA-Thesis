@@ -6,26 +6,34 @@ import subprocess
 import os
 import tempfile
 import config
+import json
+from pprint import pprint
 
+outputFile = tempfile.NamedTemporaryFile(delete=False, dir=config.WORKING_DIRECTORY, suffix=".conllu")
+language = ""
 
 def getConllFormat(sentence):
 
+    global language
+    language = sentence[0]
+
     x = unicode(sentence[1])
     inputFile = tempfile.NamedTemporaryFile(delete=False, dir=config.WORKING_DIRECTORY, suffix=".txt")
-    outputFile = tempfile.NamedTemporaryFile(delete=False, dir=config.WORKING_DIRECTORY, suffix=".conll")
+    # outputFile = tempfile.NamedTemporaryFile(delete=False, dir=config.WORKING_DIRECTORY, suffix=".conllu")
+    # print type(outputFile)
 
     inputFile.write(x.encode('utf-8'))
     inputFile.close()
 
     ip = os.path.basename(inputFile.name)
     op = os.path.basename(outputFile.name)
-    # run bash commands from this script using subprocess
 
+    # run bash commands from this script using subprocess
     command = '''
         MODEL_DIRECTORY="%s/%s"
         cat %s | %s $MODEL_DIRECTORY > %s
         ''' % (config.MODEL_DIRECTORY,sentence[0],ip, config.PARSER_PATH, op)
-    #print command
+
     process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True,
                                cwd= config.WORKING_DIRECTORY)
     process.communicate(command)
@@ -34,152 +42,75 @@ def getConllFormat(sentence):
     output = []
     for line in outputFile:
         output.append(line)
+
     outputFile.close()
 
     # delete all files created in the process
     os.remove(inputFile.name)
-    os.remove(outputFile.name)
+    # os.remove(outputFile.name)
 
     # return the list containing the conll format of the user enetered sentence
     return output
 
 
-#--------------------------------- OLD CODE CAN BE DELETED ---------------------------------------------------------
+def getSelectedList(query):
 
-# Rest of the code and the functions can be deleted
+    fq = "\"" + query.replace('"', '\\"') + "\""
+    print fq
 
-    # if sentence[0] == "en":
-    #    output = enConllFormat(inputFile, outputFile, sentence[1])
-    #
-    # elif sentence[0] == "de":
-    #     output = deConllFormat(inputFile, outputFile, sentence[1])
-    # elif sentence[0] == "es":
-    #     output = esConllFormat(inputFile, outputFile, sentence[1])
-    # elif sentence[0] == "du":
-    #     output = duConllFormat(inputFile, outputFile, sentence[1])
-    # else:
-    #     print "No correct language selected"
-    # return output
+    # op = outputFile.name
+    # print op
+    # with open(op, 'r') as f:
+    #     for line in f:
+    #         print line
 
-# ENGLISH
-def enConllFormat(inputFile, outputFile, sentence):
-
-    inputFile.write(sentence)
-    inputFile.close()
-
-    ip = os.path.basename(inputFile.name)
-    op = os.path.basename(outputFile.name)
-    # run bash commands from this script using subprocess
-
+    # open(outputFile, 'r')
     command = '''
-    MODEL_DIRECTORY="/home/ankita/models/syntaxnet/syntaxnet/models/english"
-    cat %s | syntaxnet/models/parsey_universal/parse.sh $MODEL_DIRECTORY > %s
-    ''' %(ip,op)
-    print command
-    process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True,
-                               cwd='/home/ankita/models/syntaxnet/')
+            CONLLU2_FILE=%s
+            QUERY=%s
+            LANGUAGE=%s
+            API="https://weblicht.sfs.uni-tuebingen.de/tundra-beta/api/query/visres"
+            curl -X POST -F "file=@$CONLLU2_FILE" -F "query=$QUERY" -F "lang=$LANGUAGE" "$API" > api-test.json
+            ''' % (outputFile.name, fq, language)
+
+    process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
     process.communicate(command)
 
-    #read outputFile and write it to a list
-    output_en = []
-    for line in outputFile:
-        output_en.append(line)
-    outputFile.close()
+    with open("api-test.json") as dataFile:
+        data = json.load(dataFile)
+        selectedWord = []
+        selectedRel = []
+        nodes = set()
+        relations = set()
 
-    #delete all files created in the process
-    os.remove(inputFile.name)
-    os.remove(outputFile.name)
+        allNodes = {}
+        allRels = {}
 
-    #return the list containing the conll format of the user enetered sentence
-    return output_en
+        for item in data:
+            for x in item["d3Input"]["queryMatch"]:
+                nodes.add(x["terminalPosition"])
+            for y in item["d3Input"]["queryRelations"]:
+                relations.add(y["id"])
 
-# GERMAN
-def deConllFormat(inputFile, outputFile, sentence):
+        for item in data[0]["d3Input"]["nodes"]:
+            key = item["node"].split("n")[1]
+            value = item["name"]
+            allNodes[key] = value
+        for item in data[0]["d3Input"]["links"]:
+            key = item["id"]
+            value = item["dependency"]
+            allRels[key] = value
 
-    inputFile.write(sentence)
-    inputFile.close()
+        for k, v in allNodes.items():
+            for x in nodes:
+                if int(k) == x:
+                    selectedWord.append(v)
 
-    ip = os.path.basename(inputFile.name)
-    op = os.path.basename(outputFile.name)
-
-    # run bash commands from this script using subprocess
-    command = '''
-    MODEL_DIRECTORY="/home/ankita/models/syntaxnet/syntaxnet/models/german"
-    cat %s | syntaxnet/models/parsey_universal/parse.sh $MODEL_DIRECTORY > %s
-    ''' %(ip,op)
-    process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True,
-                               cwd='/home/ankita/models/syntaxnet/')
-    process.communicate(command)
-
-    # read output_en.conll file and write it to a list
-    output_de = []
-    for line in outputFile:
-        output_de.append(line)
-    outputFile.close()
-
-    # delete all files created in the process
-    os.remove(inputFile.name)
-    os.remove(outputFile.name)
-
-    # return the list containing the conll format of the user enetered sentence
-    return output_de
-
-# SPANISH
-def esConllFormat(inputFile, outputFile, sentence):
-    #write sentence to a file sentences_en.txt
-    inputFile = open('/home/ankita/models/syntaxnet/sentences_es.txt', 'w')
-    inputFile.write(sentence)
-    inputFile.close()
-
-    # run bash commands from this script using subprocess
-    command = '''
-    MODEL_DIRECTORY="/home/ankita/models/syntaxnet/syntaxnet/models/spanish"
-    bazel build syntaxnet:parser_eval
-    cat sentences_es.txt | syntaxnet/models/parsey_universal/parse.sh $MODEL_DIRECTORY > output_es.conll
-    '''
-    process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, cwd='/home/ankita/models/syntaxnet/')
-    process.communicate(command)
-
-    #read output_en.conll file and write it to a list
-    outputFile = open('/home/ankita/models/syntaxnet/output_es.conll', 'r')
-    output_es = []
-    for line in outputFile:
-        output_es.append(line)
-    outputFile.close()
-
-    #delete all files created in the process
-    os.remove('/home/ankita/models/syntaxnet/sentences_es.txt')
-    os.remove('/home/ankita/models/syntaxnet/output_es.conll')
-
-    #return the list containing the conll format of the user enetered sentence
-    return output_es
-
-# DUTCH
-def duConllFormat(inputFile, outputFile, sentence):
-    #write sentence to a file sentences_en.txt
-    inputFile = open('/home/ankita/models/syntaxnet/sentences_du.txt', 'w')
-    inputFile.write(sentence)
-    inputFile.close()
-
-    # run bash commands from this script using subprocess
-    command = '''
-    MODEL_DIRECTORY="/home/ankita/models/syntaxnet/syntaxnet/models/dutch"
-
-    cat sentences_du.txt | syntaxnet/models/parsey_universal/parse.sh $MODEL_DIRECTORY > output_du.conll
-    '''
-    process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, cwd='/home/ankita/models/syntaxnet/')
-    process.communicate(command)
-
-    #read output_en.conll file and write it to a list
-    outputFile = open('/home/ankita/models/syntaxnet/output_du.conll', 'r')
-    output_du = []
-    for line in outputFile:
-        output_du.append(line)
-    outputFile.close()
-
-    #delete all files created in the process
-    os.remove('/home/ankita/models/syntaxnet/sentences_du.txt')
-    os.remove('/home/ankita/models/syntaxnet/output_du.conll')
-
-    #return the list containing the conll format of the user enetered sentence
-    return output_du
+        for k, v in allRels.items():
+            for x in relations:
+                if x == k:
+                    selectedRel.append(v)
+    # os.remove(outputFile.name)
+    print selectedWord
+    print selectedRel
+    return [selectedWord, selectedRel, outputFile.name]
